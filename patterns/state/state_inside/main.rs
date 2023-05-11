@@ -20,13 +20,17 @@ struct Toggle<'a> {
 impl<'a> Toggle<'a> {
     fn new() -> Self {
         Self {
-            state: Some(Box::new(FirstState {}))
+            state: Self::default_state()
         }
     }
 
     fn switch(&mut self) {
         let curr_state = self.state.take().unwrap();
         curr_state.next_state(self);
+
+        if self.state.is_none() {
+            self.state = Self::default_state();
+        }
     }
 
     fn name(&self) -> String {
@@ -35,6 +39,10 @@ impl<'a> Toggle<'a> {
 
     fn set_state(&mut self, new_state: impl State + 'a) {
         self.state.replace(Box::new(new_state));
+    }
+
+    fn default_state() -> Option<Box<dyn State>> {
+        Some(Box::new(FirstState{}))
     }
 }
 
