@@ -8,7 +8,7 @@ An attempt to implement the famous design patterns from Gof in the Rust programm
     <th>life</th>
   </tr>
   <tr>
-    <th colspan="3">Creation</td>
+    <th colspan="3">Creation
   </tr>
   
   <tr>
@@ -42,7 +42,7 @@ An attempt to implement the famous design patterns from Gof in the Rust programm
   </tr>
   
   <tr>
-    <th colspan="3">Behavioral</td>
+    <th colspan="3">Behavioral
   </tr>
   
   <tr>
@@ -89,7 +89,10 @@ An attempt to implement the famous design patterns from Gof in the Rust programm
   
   <tr>
     <td>State</td>
-    <td></td>
+    <td>
+        <a href="/patterns/state/state_return">state_return</a>
+        <a href="/patterns/state/state_inside">state_inside</a>
+    </td>
     <td></td>
   </tr>
    
@@ -112,7 +115,7 @@ An attempt to implement the famous design patterns from Gof in the Rust programm
   </tr>
   
   <tr>
-    <th colspan="3">Structural</td>
+    <th colspan="3">Structural
   </tr>
   
   <tr>

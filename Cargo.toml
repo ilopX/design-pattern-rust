@@ -1,0 +1,17 @@
+[package]
+name = "s"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "state_return"
+path = "patterns/state/state_return/main.rs"
+
+[[bin]]
+name = "state_inside"
+path = "patterns/state/state_inside/main.rs"
+
+
+[dependencies]
