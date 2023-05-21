@@ -1,19 +1,25 @@
 use std::cell::RefCell;
+use std::rc::Rc;
 
 fn main() {
     let accumulator = RefCell::new(vec![]);
     let mut ob = Observer::<i32>::new();
 
-    ob.subscribe(|val| accumulator.borrow_mut().push(val.clone()));
+    let subscriber = ob.subscribe(|val| {
+        accumulator.borrow_mut().push(val.clone())
+    });
 
     ob.notify(1);
     ob.notify(2);
+    ob.unsubscribe(subscriber);
+    ob.notify(3);
+    ob.notify(4);
 
     assert_eq!(accumulator.borrow().as_slice(), &[1, 2]);
 }
 
 struct Observer<'a, T> {
-    subs: Vec<Box<dyn FnMut(&T) + 'a>>,
+    subs: Vec<Subscriber<'a, T>>,
 }
 
 impl<'a, T> Observer<'a, T> {
@@ -23,13 +29,56 @@ impl<'a, T> Observer<'a, T> {
         }
     }
 
-    fn subscribe(&mut self, call: impl FnMut(&T) + 'a) {
-        self.subs.push(Box::new(call));
+    fn subscribe(&mut self, call: impl FnMut(&T) + 'a) -> Subscriber<'a, T> {
+        let subscriber = Subscriber::new(call);
+        let return_subscriber = subscriber.clone();
+        self.subs.push(subscriber);
+
+        return_subscriber
+    }
+
+    fn unsubscribe(&mut self, subscriber: Subscriber<'a, T>) {
+        let index = self.subs.iter()
+            .position(|val| val == &subscriber);
+
+        if let Some(index) = index {
+            self.subs.remove(index);
+        }
     }
 
     fn notify(&mut self, new_value: T) {
-        self.subs
-            .iter_mut()
-            .for_each(|call| call(&new_value));
+        for subscriber in self.subs.iter() {
+            subscriber.call(&new_value);
+        }
+    }
+}
+
+struct Subscriber<'a, T> {
+    call: Rc<RefCell<dyn FnMut(&T) + 'a>>,
+}
+
+impl<'a, T> Subscriber<'a, T> {
+    fn new(call: impl FnMut(&T) + 'a) -> Self {
+        Self {
+            call: Rc::new(RefCell::new(call))
+        }
+    }
+
+    fn call(&self, val: &T) {
+        self.call.borrow_mut()(val);
+    }
+}
+
+impl<'a, T> Clone for Subscriber<'a, T> {
+    fn clone(&self) -> Self {
+        Subscriber {
+            call: Rc::clone(&self.call)
+        }
+    }
+}
+
+impl<'a, T> PartialEq<Self> for Subscriber<'a, T> {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.call, &other.call)
     }
 }
