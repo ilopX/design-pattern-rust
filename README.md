@@ -96,7 +96,7 @@ To learn more about the war and how you can help, [click here](https://tyrrrz.me
   <tr>
     <td>Observer</td>
     <td>
-        <a href="/patterns/observer/value_observer">value_observer</a>
+        <a href="/patterns/observer/value_observer/main.rs">value_observer</a>
     </td>
     <td></td>
   </tr>
@@ -104,8 +104,8 @@ To learn more about the war and how you can help, [click here](https://tyrrrz.me
   <tr>
     <td>State</td>
     <td>
-        <a href="/patterns/state/state_return">state_return</a>
-        <a href="/patterns/state/state_inside">state_inside</a>
+        <a href="/patterns/state/state_return/main.rs">state_return</a><br>
+        <a href="/patterns/state/state_inside/main.rs">state_inside</a>
     </td>
     <td></td>
   </tr>
