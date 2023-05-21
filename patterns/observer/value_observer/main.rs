@@ -38,12 +38,7 @@ impl<'a, T> Observer<'a, T> {
     }
 
     fn unsubscribe(&mut self, subscriber: Subscriber<'a, T>) {
-        let index = self.subs.iter()
-            .position(|val| val == &subscriber);
-
-        if let Some(index) = index {
-            self.subs.remove(index);
-        }
+        self.subs.retain(|val| val != &subscriber);
     }
 
     fn notify(&mut self, new_value: T) {
