@@ -96,8 +96,8 @@ To learn more about the war and how you can help, [click here](https://tyrrrz.me
   <tr>
     <td>Observer</td>
     <td>
-        <a href="/patterns/observer/value_observer/main.rs">value_observer</a><br>
-        <a href="/patterns/observer/type_observer/main.rs">type_observer</a>
+        <a href="/patterns/observer/value_observer/main.rs">value_observer <sup>not secure</sup></a><br>
+        <a href="/patterns/observer/type_observer/main.rs">type_observer <sup>not secure</sup></a>
     </td>
     <td></td>
   </tr>
