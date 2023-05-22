@@ -64,6 +64,7 @@ impl<T> Subscriber<T> {
         }
     }
 
+    #[inline]
     fn call(&self, val: &T) {
         self.call.borrow_mut()(val);
     }
