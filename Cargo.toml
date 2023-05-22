@@ -17,5 +17,8 @@ path = "patterns/state/state_inside/main.rs"
 name = "value_observer"
 path = "patterns/observer/value_observer/main.rs"
 
+[[bin]]
+name = "type_observer"
+path = "patterns/observer/type_observer/main.rs"
 
 [dependencies]
