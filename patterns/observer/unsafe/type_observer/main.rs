@@ -8,27 +8,21 @@ fn main() {
     let mut result_str = String::new();
     let mut ob = Observer::new();
 
-    {
-        ob.subscribe(|event: &FirstEvent| {
-            result_str.push_str(&format!("name: {} \n", event.name))
-        });
+    ob.subscribe(|event: &FirstEvent| {
+        result_str.push_str(&format!("name: {}, ", event.name))
+    });
 
-        ob.subscribe(|event: &SecondEvent| {
-            result_str.push_str(&format!("num: {} \n", event.num));
-        });
-    }
-
-    let print_subscriber = ob.subscribe::<PrintResultEvent>(|_| {
-        println!("{result_str}");
+    let print_subscriber = ob.subscribe(|event: &SecondEvent| {
+        result_str.push_str(&format!("num: {}", event.num));
     });
 
     ob.notify(FirstEvent { name: "ilopX" });
     ob.notify(SecondEvent { num: 100 });
-    ob.notify(SecondEvent { num: 200 });
-    ob.notify(PrintResultEvent {});
 
     ob.unsubscribe(print_subscriber);
-    ob.notify(PrintResultEvent {});
+    ob.notify(SecondEvent { num: 200 });
+
+    assert_eq!("name: ilopX, num: 100", result_str);
 }
 
 
@@ -193,6 +187,3 @@ struct SecondEvent {
 
 impl Event for SecondEvent {}
 
-struct PrintResultEvent {}
-
-impl Event for PrintResultEvent {}

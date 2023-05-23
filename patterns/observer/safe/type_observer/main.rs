@@ -8,33 +8,29 @@ fn main() {
     let result_str = RefCell::new(String::new());
     let mut ob = Observer::new();
 
-    {
-        ob.subscribe(|event: &FirstEvent| {
-            result_str.borrow_mut().push_str(&format!("name: {} \n", event.name))
-        });
 
-        ob.subscribe(|event: &SecondEvent| {
-            result_str.borrow_mut().push_str(&format!("num: {} \n", event.num));
-        });
-    }
+    ob.subscribe(|event: &FirstEvent| {
+        result_str.borrow_mut().push_str(&format!("name: {}, ", event.name))
+    });
 
-    let print_subscriber = ob.subscribe::<PrintResultEvent>(|_| {
-        println!("{}", result_str.borrow());
+    let second_subscriber = ob.subscribe(|event: &SecondEvent| {
+        result_str.borrow_mut().push_str(&format!("num: {}", event.num));
     });
 
     ob.notify(FirstEvent { name: "ilopX" });
     ob.notify(SecondEvent { num: 100 });
-    ob.notify(SecondEvent { num: 200 });
-    ob.notify(PrintResultEvent {});
 
-    ob.unsubscribe(print_subscriber);
-    ob.notify(PrintResultEvent {});
+    ob.unsubscribe(second_subscriber);
+    ob.notify(SecondEvent { num: 200 });
+
+    assert_eq!("name: ilopX, num: 100", *result_str.borrow());
 }
 
 
 #[cfg(test)]
 mod tests {
     use std::cell::Cell;
+
     use crate::*;
 
     #[test]
@@ -53,7 +49,7 @@ mod tests {
         let it_works = Cell::new(false);
         let mut ob = Observer::new();
 
-        let subscriber = ob.subscribe::<FirstEvent>(|_| it_works.set( true));
+        let subscriber = ob.subscribe::<FirstEvent>(|_| it_works.set(true));
         ob.unsubscribe(subscriber);
         ob.notify(FirstEvent { name: "" });
 
@@ -65,7 +61,7 @@ mod tests {
         let works = Cell::new(0);
         let mut ob = Observer::new();
 
-        ob.subscribe::<FirstEvent>(|_| works.set(works.get() + 10) );
+        ob.subscribe::<FirstEvent>(|_| works.set(works.get() + 10));
         ob.subscribe::<SecondEvent>(|event| works.set(works.get() + event.num));
 
         ob.notify(FirstEvent { name: "" });
@@ -113,7 +109,7 @@ impl<'a> Observer<'a> {
 
         if let Some(sub_list) = subscribers {
             for subscriber in sub_list {
-                (RefCell::borrow_mut(&subscriber.fun))(&event)
+                subscriber.call(&event);
             }
         }
     }
@@ -154,6 +150,11 @@ impl<'a> Subscriber<'a> {
         }
     }
 
+    #[inline]
+    fn call<E: Event>(&self, event: &E) {
+        (RefCell::borrow_mut(&self.fun))(event);
+    }
+
     fn convert_to_any_args<E: Event>(call: impl FnMut(&E)) -> DestEvent<'a> {
         let call = Rc::new(RefCell::new(call));
         unsafe {
@@ -189,7 +190,3 @@ struct SecondEvent {
 }
 
 impl Event for SecondEvent {}
-
-struct PrintResultEvent {}
-
-impl Event for PrintResultEvent {}
