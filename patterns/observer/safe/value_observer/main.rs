@@ -3,29 +3,31 @@ use std::rc::Rc;
 
 fn main() {
     let accumulator = RefCell::new(vec![]);
-    let mut ob = ValueObserver::<i32>::new();
+    let mut ob = ValueObserver::new(0);
 
     let subscriber = ob.subscribe(|val| {
         accumulator.borrow_mut().push(*val);
     });
 
-    ob.notify(1);
-    ob.notify(2);
+    ob.set(1);
+    ob.set(2);
     ob.unsubscribe(subscriber);
-    ob.notify(3);
-    ob.notify(4);
+    ob.set(3);
 
     assert_eq!(accumulator.borrow().as_slice(), &[1, 2]);
+    assert_eq!(ob.get(), &2);
 }
 
 
 struct ValueObserver<'a, T> {
+    val: T,
     subscribers: Vec<Subscriber<'a, T>>,
 }
 
 impl<'a, T> ValueObserver<'a, T> {
-    fn new() -> Self {
+    fn new(val: T) -> Self {
         Self {
+            val,
             subscribers: vec![],
         }
     }
@@ -42,10 +44,16 @@ impl<'a, T> ValueObserver<'a, T> {
         self.subscribers.retain(|val| val != &subscriber);
     }
 
-    fn notify(&mut self, new_value: T) {
+    fn set(&mut self, new_value: T) {
         for subscriber in self.subscribers.iter() {
             subscriber.call(&new_value);
         }
+
+        self.val = new_value;
+    }
+
+    fn get(&self) -> &T {
+        &self.val
     }
 }
 
