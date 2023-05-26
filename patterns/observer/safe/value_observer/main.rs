@@ -3,10 +3,10 @@ use std::rc::Rc;
 
 fn main() {
     let accumulator = RefCell::new(vec![]);
-    let mut ob = Observer::<i32>::new();
+    let mut ob = ValueObserver::<i32>::new();
 
     let subscriber = ob.subscribe(|val| {
-        accumulator.borrow_mut().push(val.clone());
+        accumulator.borrow_mut().push(*val);
     });
 
     ob.notify(1);
@@ -18,31 +18,32 @@ fn main() {
     assert_eq!(accumulator.borrow().as_slice(), &[1, 2]);
 }
 
-struct Observer<'a, T> {
-    subs: Vec<Subscriber<'a, T>>,
+
+struct ValueObserver<'a, T> {
+    subscribers: Vec<Subscriber<'a, T>>,
 }
 
-impl<'a, T> Observer<'a, T> {
+impl<'a, T> ValueObserver<'a, T> {
     fn new() -> Self {
         Self {
-            subs: vec![],
+            subscribers: vec![],
         }
     }
 
     fn subscribe(&mut self, call: impl FnMut(&T) + 'a) -> Subscriber<'a, T> {
         let subscriber = Subscriber::new(call);
         let return_subscriber = subscriber.clone();
-        self.subs.push(subscriber);
+        self.subscribers.push(subscriber);
 
         return_subscriber
     }
 
     fn unsubscribe(&mut self, subscriber: Subscriber<'a, T>) {
-        self.subs.retain(|val| val != &subscriber);
+        self.subscribers.retain(|val| val != &subscriber);
     }
 
     fn notify(&mut self, new_value: T) {
-        for subscriber in self.subs.iter() {
+        for subscriber in self.subscribers.iter() {
             subscriber.call(&new_value);
         }
     }
