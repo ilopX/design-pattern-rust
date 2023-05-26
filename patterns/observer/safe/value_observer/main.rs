@@ -15,7 +15,7 @@ fn main() {
     ob.set(3);
 
     assert_eq!(accumulator.borrow().as_slice(), &[1, 2]);
-    assert_eq!(ob.get(), &2);
+    assert_eq!(ob.get(), &3);
 }
 
 
