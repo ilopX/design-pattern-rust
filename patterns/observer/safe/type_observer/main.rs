@@ -8,7 +8,6 @@ fn main() {
     let result_str = RefCell::new(String::new());
     let mut ob = Observer::new();
 
-
     ob.subscribe(|event: &FirstEvent| {
         result_str.borrow_mut().push_str(&format!("name: {}, ", event.name))
     });
@@ -21,9 +20,9 @@ fn main() {
     ob.notify(SecondEvent { num: 100 });
 
     ob.unsubscribe(second_subscriber);
-    ob.notify(SecondEvent { num: 200 });
+    ob.notify(SecondEvent { num: 200 }); // not be called
 
-    assert_eq!("name: ilopX, num: 100", *result_str.borrow());
+    assert_eq!(*result_str.borrow(), "name: ilopX, num: 100");
 }
 
 
@@ -58,16 +57,16 @@ mod tests {
 
     #[test]
     fn two_events() {
-        let works = Cell::new(0);
+        let counter = Cell::new(0);
         let mut ob = Observer::new();
 
-        ob.subscribe::<FirstEvent>(|_| works.set(works.get() + 10));
-        ob.subscribe::<SecondEvent>(|event| works.set(works.get() + event.num));
+        ob.subscribe::<FirstEvent>(|_| counter.set(counter.get() + 10));
+        ob.subscribe::<SecondEvent>(|event| counter.set(counter.get() + event.num));
 
         ob.notify(FirstEvent { name: "" });
         ob.notify(SecondEvent { num: 5 });
 
-        assert_eq!(works.get(), 15);
+        assert_eq!(counter.get(), 15);
     }
 }
 
@@ -86,50 +85,51 @@ impl<'a> Observer<'a> {
     fn subscribe<E: Event>(&mut self, call: impl FnMut(&E) + 'a) -> Subscriber<'a> {
         let new_subscriber = Subscriber::new(call);
         let return_subscriber = new_subscriber.clone();
-
-        match self.subscribers.get_mut(&new_subscriber.event_id) {
-            Some(e) => {
-                e.push(new_subscriber);
-            }
-            None => {
-                self.subscribers.insert(
-                    new_subscriber.event_id.clone(),
-                    vec![new_subscriber],
-                );
-            }
-        };
+        self.add(new_subscriber);
 
         return_subscriber
     }
 
-    fn notify<E: Event>(&mut self, event: E)
-    {
-        let event_id = event.type_id();
-        let subscribers = self.subscribers.get_mut(&event_id);
-
-        if let Some(sub_list) = subscribers {
-            for subscriber in sub_list {
+    fn notify<E: Event>(&mut self, event: E) {
+        if let Some(subscribers) = self.subscribers_by(&event.type_id()) {
+            for subscriber in subscribers {
                 subscriber.call(&event);
             }
         }
     }
 
     fn unsubscribe(&mut self, subscriber: Subscriber<'a>) {
-        let event_id = &subscriber.event_id;
-        let subscribers = self.subscribers.get_mut(event_id);
-
-        if let Some(list) = subscribers {
-            let index = list.iter().position(|val| val == &subscriber);
+        if let Some(subscribers) = self.subscribers_by(&subscriber.event_id) {
+            let index = subscribers.iter().position(|val| val == &subscriber);
 
             if let Some(index) = index {
-                list.remove(index);
+                subscribers.remove(index);
             }
         }
+    }
+
+    #[inline]
+    fn add(&mut self, new_subscriber: Subscriber<'a>) {
+        let event_id = new_subscriber.event_id;
+
+        match self.subscribers.get_mut(&event_id) {
+            Some(existing_list) => {
+                existing_list.push(new_subscriber)
+            }
+            None => {
+                self.subscribers.insert(event_id.clone(), vec![new_subscriber]);
+            }
+        };
+    }
+
+    #[inline]
+    fn subscribers_by(&mut self, event_id: &TypeId) -> Option<&mut Vec<Subscriber<'a>>> {
+        self.subscribers.get_mut(event_id)
     }
 }
 
 
-type DestEvent<'a> = Rc<RefCell<dyn FnMut(&dyn Any) + 'a>>;
+type SubscriberCall<'a> = Rc<RefCell<dyn FnMut(&dyn Any) + 'a>>;
 
 trait Event: Any + Sized {
     fn cast(a: &dyn Any) -> &Self {
@@ -139,7 +139,7 @@ trait Event: Any + Sized {
 
 struct Subscriber<'a> {
     event_id: TypeId,
-    fun: DestEvent<'a>,
+    fun: SubscriberCall<'a>,
 }
 
 impl<'a> Subscriber<'a> {
@@ -155,10 +155,10 @@ impl<'a> Subscriber<'a> {
         (RefCell::borrow_mut(&self.fun))(event);
     }
 
-    fn convert_to_any_args<E: Event>(call: impl FnMut(&E)) -> DestEvent<'a> {
+    fn convert_to_any_args<E: Event>(call: impl FnMut(&E)) -> SubscriberCall<'a> {
         let call = Rc::new(RefCell::new(call));
         unsafe {
-            mem::transmute::<Rc<RefCell<dyn FnMut(&E)>>, DestEvent>(call)
+            mem::transmute::<Rc<RefCell<dyn FnMut(&E)>>, SubscriberCall<'a>>(call)
         }
     }
 }
