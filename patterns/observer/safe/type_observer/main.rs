@@ -91,7 +91,7 @@ impl<'a> Observer<'a> {
     }
 
     fn notify<E: Event>(&mut self, event: E) {
-        if let Some(subscribers) = self.subscribers_by(&event.type_id()) {
+        if let Some(subscribers) = self.get_subscribers(&event.type_id()) {
             for subscriber in subscribers {
                 subscriber.call(&event);
             }
@@ -99,7 +99,7 @@ impl<'a> Observer<'a> {
     }
 
     fn unsubscribe(&mut self, subscriber: Subscriber<'a>) {
-        if let Some(subscribers) = self.subscribers_by(&subscriber.event_id) {
+        if let Some(subscribers) = self.get_subscribers(&subscriber.event_id) {
             let index = subscribers.iter().position(|val| val == &subscriber);
 
             if let Some(index) = index {
@@ -112,18 +112,19 @@ impl<'a> Observer<'a> {
     fn add(&mut self, new_subscriber: Subscriber<'a>) {
         let event_id = new_subscriber.event_id;
 
-        match self.subscribers.get_mut(&event_id) {
+        match self.get_subscribers(&event_id) {
             Some(existing_list) => {
                 existing_list.push(new_subscriber)
             }
             None => {
-                self.subscribers.insert(event_id.clone(), vec![new_subscriber]);
+                let new_list = vec![new_subscriber];
+                self.subscribers.insert(event_id.clone(), new_list);
             }
         };
     }
 
     #[inline]
-    fn subscribers_by(&mut self, event_id: &TypeId) -> Option<&mut Vec<Subscriber<'a>>> {
+    fn get_subscribers(&mut self, event_id: &TypeId) -> Option<&mut Vec<Subscriber<'a>>> {
         self.subscribers.get_mut(event_id)
     }
 }
