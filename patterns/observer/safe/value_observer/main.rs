@@ -18,7 +18,6 @@ fn main() {
     assert_eq!(ob.get(), &3);
 }
 
-
 struct ValueObserver<'a, T> {
     val: T,
     subscribers: Vec<Subscriber<'a, T>>,
@@ -57,7 +56,6 @@ impl<'a, T> ValueObserver<'a, T> {
     }
 }
 
-
 type SubscriberCall<'a, T> = Rc<RefCell<dyn FnMut(&T) + 'a>>;
 
 struct Subscriber<'a, T> {
@@ -80,7 +78,7 @@ impl<'a, T> Subscriber<'a, T> {
 impl<'a, T> Clone for Subscriber<'a, T> {
     fn clone(&self) -> Self {
         Subscriber {
-            call: Rc::clone(&self.call)
+            call: Rc::clone(&self.call),
         }
     }
 }
