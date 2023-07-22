@@ -1,18 +1,6 @@
 # Design Pattern in Rust lang
 An attempt to implement the famous design patterns from Gof in the Rust programming language.
 
-
-## Terms of use<sup>[[?]](https://github.com/Tyrrrz/.github/blob/master/docs/why-so-political.md)</sup>
-
-By using this project or its source code, for any purpose and in any shape or form, you grant your **implicit agreement** to all the following statements:
-
-- You **condemn Russia and its military aggression against Ukraine**
-- You **recognize that Russia is an occupant that unlawfully invaded a sovereign state**
-- You **support Ukraine's territorial integrity, including its claims over temporarily occupied territories of Crimea and Donbas**
-- You **reject false narratives perpetuated by Russian state propaganda**
-
-To learn more about the war and how you can help, [click here](https://tyrrrz.me/ukraine). Glory to Ukraine! 🇺🇦
-
 <table>
   <tr>
     <th>pattern</th>
@@ -180,4 +168,14 @@ To learn more about the war and how you can help, [click here](https://tyrrrz.me
 
 Each pattern is implemented in several examples from a primitive implementation to a real life example.
 
-Simpler implementations of examples are labeled A, more complex implementations B, C, and so on. The further the letter, the more difficult the implementation.
+
+## Terms of use<sup>[[?]](https://github.com/Tyrrrz/.github/blob/master/docs/why-so-political.md)</sup>
+
+By using this project or its source code, for any purpose and in any shape or form, you grant your **implicit agreement** to all the following statements:
+
+- You **condemn Russia and its military aggression against Ukraine**
+- You **recognize that Russia is an occupant that unlawfully invaded a sovereign state**
+- You **support Ukraine's territorial integrity, including its claims over temporarily occupied territories of Crimea and Donbas**
+- You **reject false narratives perpetuated by Russian state propaganda**
+
+To learn more about the war and how you can help, [click here](https://tyrrrz.me/ukraine). Glory to Ukraine! 🇺🇦
