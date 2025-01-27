@@ -18,7 +18,6 @@ fn main() {
     observer.send(RedEvent {});
     observer.send(FirstEvent { val: 555 });
 
-    // FirstEvent sent to -> SecondEvent send to -> ThirdEvent change buffer
     assert_eq!("first(555) second third", text.borrow().as_str());
     println!("{}", text.borrow());
 }
@@ -33,38 +32,36 @@ fn create_events(
         }),
         observer.listen::<FirstEvent>(|first_event, events| {
             events.send(SecondEvent {
-                message: format!("first({})", first_event.val),
+                message: format!("first({}), ", first_event.val),
             });
         }),
         observer.listen::<SecondEvent>(|second_event, events| {
-            let new_val = format!("{} second", second_event.message);
-
             events.send(ThirdEvent {
-                string_val: new_val,
+                string_val: format!("{} second, ", second_event.message),
             });
         }),
         observer.listen::<ThirdEvent>(|third_event, _| {
-            let new_val = format!("{} third", third_event.string_val);
-            text.borrow_mut().push_str(&new_val);
+            text.borrow_mut()
+                .push_str(&format!("{} third, ", third_event.string_val));
         }),
     )
 }
 
-// This code implements a structure called Hub, designed as a centralized system for message
-// processing. Hub performs the following tasks:
+// This code implements a structure called Observer, designed as a centralized system for message
+// processing. Observer performs the following tasks:
 //
 // 1. Message Reception: The structure accepts messages represented as other structures (objects)
 // that may contain data or logic.
 //
-// 2. Message Processing: During processing, the Hub dispatches signals to subscribers that are
+// 2. Message Processing: During processing, the Observer dispatches signals to subscribers that are
 // registered to receive specific types of messages.
 //
 // 3. Nested Message Support: The structure allows messages to be sent within other messages being
 // processed. These nested messages are queued and processed after the current layer of messages is
 // completed.
 //
-// In summary, Hub provides an event-driven subscription and processing system with nested message
-// handling capabilities, making it a versatile tool for complex asynchronous workflows.
+// In summary, Observer provides an event-driven subscription and processing system with nested 
+// message handling capabilities, making it a versatile tool for complex asynchronous workflows.
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // main function implementation
