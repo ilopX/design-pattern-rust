@@ -14,19 +14,11 @@ name = "state_inside"
 path = "patterns/state/state_inside/main.rs"
 
 [[bin]]
-name = "value_observer_safe"
-path = "patterns/observer/safe/value_observer/main.rs"
+name = "value_observer"
+path = "patterns/observer/value_observer/main.rs"
 
 [[bin]]
-name = "type_observer_safe"
-path = "patterns/observer/safe/type_observer/main.rs"
-
-[[bin]]
-name = "value_observer_unsafe"
-path = "patterns/observer/unsafe/value_observer/main.rs"
-
-[[bin]]
-name = "type_observer_secure"
-path = "patterns/observer/unsafe/type_observer/main.rs"
+name = "type_observer"
+path = "patterns/observer/type_observer/main.rs"
 
 [dependencies]

@@ -85,9 +85,7 @@ An attempt to implement the famous design patterns from Gof in the Rust programm
     <td>Observer</td>
     <td>
         <a href="/patterns/observer/safe/value_observer/main.rs">value_observer</a><br>
-        <a href="/patterns/observer/unsafe/value_observer/main.rs">value_observer <sup>unsafe</sup></a><br>
         <a href="/patterns/observer/safe/type_observer/main.rs">type_observer</a><br>
-        <a href="/patterns/observer/unsafe/type_observer/main.rs">type_observer <sup>unsafe</sup></a>
     </td>
     <td></td>
   </tr>
