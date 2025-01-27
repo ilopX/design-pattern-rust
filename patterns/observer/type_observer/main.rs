@@ -29,7 +29,7 @@ fn create_events(
 ) -> (Listener, Listener, Listener, Listener) {
     (
         observer.listen::<RedEvent>(|_, _| {
-            text.borrow_mut().push_str("some text");
+            text.borrow_mut().push_str("red event");
         }),
         observer.listen::<FirstEvent>(|first_event, events| {
             events.send(SecondEvent {
