@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 mod even_pool;
-mod listener_map;
+mod observer_map;
 mod observer;
 mod vec_listeners;
 

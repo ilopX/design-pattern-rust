@@ -1,5 +1,5 @@
 use crate::even_pool::EventPool;
-use crate::listener_map::ListenerMap;
+use crate::observer_map::ObserverMap;
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
 use std::mem;
@@ -10,13 +10,13 @@ pub trait Event: Any {}
 const DEFAULT_BUFFER_SIZE: usize = 10;
 
 pub struct Observer {
-    rc_listener_map: Rc<RefCell<ListenerMap>>,
+    observer_map: Rc<RefCell<ObserverMap>>,
 }
 
 impl Observer {
     pub fn new() -> Self {
         Self {
-            rc_listener_map: Rc::new(RefCell::new(ListenerMap::new(DEFAULT_BUFFER_SIZE))),
+            observer_map: Rc::new(RefCell::new(ObserverMap::new(DEFAULT_BUFFER_SIZE))),
         }
     }
 
@@ -31,7 +31,7 @@ impl Observer {
     }
 
     pub fn send(&self, event: impl Event) {
-        self.rc_listener_map.borrow_mut().send(event);
+        self.observer_map.borrow_mut().send(event);
     }
 }
 
@@ -39,7 +39,7 @@ type DynEventFn = Box<dyn FnMut(&Box<dyn Event>, &mut EventPool)>;
 
 struct ListenerData {
     event_type: TypeId,
-    parent: Option<Rc<RefCell<ListenerMap>>>,
+    parent: Option<Rc<RefCell<ObserverMap>>>,
     fun: DynEventFn,
 }
 
@@ -66,9 +66,9 @@ impl Listener {
     }
 
     #[inline]
-    pub fn activate(&self, future_parent: &Observer) {
+    pub fn activate(&self, observer_parent: &Observer) {
         self.deactivate();
-        let future_parent = &future_parent.rc_listener_map;
+        let future_parent = &observer_parent.observer_map;
         self.data.borrow_mut().parent = Some(Rc::clone(future_parent));
         future_parent.borrow_mut().add(self);
     }
