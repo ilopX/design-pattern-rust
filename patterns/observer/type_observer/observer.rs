@@ -37,44 +37,44 @@ impl Observer {
 
 type DynEventFn = Box<dyn FnMut(&Box<dyn Event>, &mut EventPool)>;
 
-struct ListenerRc {
+struct ListenerData {
     event_type: TypeId,
     parent: Option<Rc<RefCell<ListenerMap>>>,
     fun: DynEventFn,
 }
 
 pub struct Listener {
-    rc: Rc<RefCell<ListenerRc>>,
+    data: Rc<RefCell<ListenerData>>,
 }
 
 impl Listener {
     pub fn new<T: Event>(listener_fn: impl FnMut(&Box<T>, &mut EventPool)) -> Self {
-        let rc = ListenerRc {
-            event_type: TypeId::of::<T>(),
+        let rc = ListenerData {
             parent: None,
+            event_type: TypeId::of::<T>(),
             fun: Self::convert_to_dyn_event_fn(listener_fn),
         };
 
         Self {
-            rc: Rc::new(RefCell::new(rc)),
+            data: Rc::new(RefCell::new(rc)),
         }
     }
 
     #[inline]
     pub fn notify(&self, arg: &Box<dyn Event>, event_pool: &mut EventPool) {
-        (self.rc.borrow_mut().fun)(arg, event_pool);
+        (self.data.borrow_mut().fun)(arg, event_pool);
     }
 
     #[inline]
     pub fn activate(&self, future_parent: &Observer) {
         self.deactivate();
         let future_parent = &future_parent.rc_listener_map;
-        self.rc.borrow_mut().parent = Some(Rc::clone(future_parent));
+        self.data.borrow_mut().parent = Some(Rc::clone(future_parent));
         future_parent.borrow_mut().add(self);
     }
 
     pub fn deactivate(&self) {
-        let parent = self.rc.borrow_mut().parent.take();
+        let parent = self.data.borrow_mut().parent.take();
 
         if let Some(parent) = parent {
             parent.borrow_mut().remove(self);
@@ -82,7 +82,7 @@ impl Listener {
     }
 
     pub fn event_type(&self) -> TypeId {
-        self.rc.borrow().event_type.clone()
+        self.data.borrow().event_type.clone()
     }
 
     fn convert_to_dyn_event_fn<T: Event>(
@@ -97,20 +97,20 @@ impl Listener {
 
 impl Clone for Listener {
     fn clone(&self) -> Self {
-        let is_second_clone_exists = Rc::strong_count(&self.rc) == 2;
+        let is_second_clone_exists = Rc::strong_count(&self.data) == 2;
 
         if is_second_clone_exists {
-            panic!("");
+            panic!("The system cannot have more than two Listener clones.");
         }
 
         Self {
-            rc: self.rc.clone(),
+            data: self.data.clone(),
         }
     }
 }
 
 impl PartialEq for Listener {
     fn eq(&self, other: &Self) -> bool {
-        Rc::ptr_eq(&self.rc, &other.rc)
+        Rc::ptr_eq(&self.data, &other.data)
     }
 }
