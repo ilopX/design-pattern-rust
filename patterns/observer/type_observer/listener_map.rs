@@ -36,7 +36,7 @@ impl ListenerMap {
             .and_modify(|list| list.remove_first(listener));
     }
 
-    pub fn call(&mut self, event: impl Event) {
+    pub fn send(&mut self, event: impl Event) {
         let mut event_pool = EventPool::from(event);
 
         while let Some(event) = event_pool.pop() {
