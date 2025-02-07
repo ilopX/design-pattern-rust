@@ -28,7 +28,7 @@ let observer = Observer::new();
 All changes will be applied to the text variable, which will go through all the events and be modified accordingly.
 An observer is also created, serving as the central example in this code.
 
-## 2.
+### 2.
 ```rust 
 let (red_listener, _, _, _) = create_events(&text, &observer);
 ```
@@ -86,3 +86,29 @@ Finally, this code sends the `FirstEvent` with the parameter val = 555.
 This event triggers a chain reaction, sending SecondEvent and then `ThirdEvent`, which ultimately modifies the 
 text variable.
 As a result, the text variable contains the string: `first(555) second third`, as confirmed by the test.
+
+## How it works
+### 1.
+Для того что бы получить побочный эффект в первую очередь нужно подписаться на одно из событий. 
+Событие это любая структура которая реализует характеристику `Event`, например:
+```rust
+struct RedEvent {}
+
+impl Event for RedEvent {}
+```
+Структура может имть любое любое количество параметров.
+Дальше мы должны подписаться на собитие `observer.listen::<EventName>(|Event, EventPool| { function body }).`
+в нутри функции listen происходит следующее: создается слушатель, слушатель активизируется и возвращается 
+обратно пользователю
+```rust
+pub fn listen<T: Event>(&self, listener_fn: impl FnMut(&Box<T>, &mut EventPool)) -> Listener {
+    let new_listener = Listener::new(listener_fn);
+    new_listener.activate(self);
+    new_listener
+}
+```
+### Listener::new
+
+
+
+

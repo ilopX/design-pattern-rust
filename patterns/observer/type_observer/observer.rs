@@ -50,8 +50,8 @@ pub struct Listener {
 impl Listener {
     pub fn new<T: Event>(listener_fn: impl FnMut(&Box<T>, &mut EventPool)) -> Self {
         let rc = ListenerRc {
-            parent: None,
             event_type: TypeId::of::<T>(),
+            parent: None,
             fun: Self::convert_to_dyn_event_fn(listener_fn),
         };
 
