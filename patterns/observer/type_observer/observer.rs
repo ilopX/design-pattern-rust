@@ -1,11 +1,10 @@
+use crate::event::Event;
 use crate::even_pool::EventPool;
 use crate::observer_map::ObserverMap;
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
 use std::mem;
 use std::rc::Rc;
-
-pub trait Event: Any {}
 
 const DEFAULT_BUFFER_SIZE: usize = 10;
 

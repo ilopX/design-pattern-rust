@@ -1,5 +1,6 @@
+use crate::event::Event;
 use crate::even_pool::EventPool;
-use crate::observer::{Event, Listener};
+use crate::observer::Listener;
 
 pub trait VecListeners<T: PartialEq> {
     fn notify_all(&self, event: &Box<dyn Event>, pool: &mut EventPool);

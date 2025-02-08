@@ -4,15 +4,17 @@ mod even_pool;
 mod observer_map;
 mod observer;
 mod vec_listeners;
+mod event;
 
-use crate::observer::{Event, Listener, Observer};
+use crate::event::Event;
+use crate::observer::{Listener, Observer};
 use std::cell::RefCell;
 
 fn main() {
-    let (observer, text) = create_observer_and_out_text();
+    let (observer, out_text) = create_observer_and_out_text();
     observer.send(RedEvent {});
     observer.send(FirstEvent { val: 555 });
-    assert_eq!("first(555) second third", text.borrow().as_str());
+    assert_eq!("first(555) second third", out_text.borrow().as_str());
 }
 
 fn create_observer_and_out_text() -> (Observer, RefCell<String>) {

@@ -1,5 +1,6 @@
+use crate::event::Event;
 use crate::even_pool::EventPool;
-use crate::observer::{Event, Listener};
+use crate::observer::Listener;
 use crate::vec_listeners::VecListeners;
 use std::any::TypeId;
 use std::collections::HashMap;

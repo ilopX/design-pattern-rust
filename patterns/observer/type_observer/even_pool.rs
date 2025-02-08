@@ -1,5 +1,5 @@
 use std::collections::VecDeque;
-use crate::observer::Event;
+use crate::event::Event;
 
 pub struct EventPool {
     events: VecDeque<Box<dyn Event>>,
