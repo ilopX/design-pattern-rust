@@ -10,23 +10,19 @@ use crate::event::Event;
 use crate::observer::{Listener, Observer};
 use std::cell::RefCell;
 
-fn main() {
-    let (observer, out_text) = create_observer_and_out_text();
-    observer.send(RedEvent {});
-    observer.send(FirstEvent { val: 555 });
-    assert_eq!("first(555) second third", out_text.borrow().as_str());
-}
 
-fn create_observer_and_out_text() -> (Observer, RefCell<String>) {
+fn main() {
     let text = RefCell::new(String::new());
     let observer = Observer::new();
 
     let (red_listener, _, _, _) = create_listeners(&text, &observer);
-    
-    // demonstrate how unsubscribe listener
-    red_listener.deactivate();
 
-    (observer, text)
+    red_listener.deactivate();
+    observer.send(RedEvent {});
+    observer.send(FirstEvent { val: 555 });
+
+    assert_eq!("first(555), second, third", text.borrow().as_str());
+    println!("{}", text.borrow());
 }
 
 fn create_listeners(
@@ -34,14 +30,14 @@ fn create_listeners(
     observer: &Observer,
 ) -> (Listener, Listener, Listener, Listener) {
     (
-        create_red_listener(&observer, &text),
-        create_first_listener(&observer),
-        create_second_listener(&observer),
-        create_third_listener(&observer, &text),
+        create_red_listener(text, observer),
+        create_first_listener(observer),
+        create_second_listener(observer),
+        create_third_listener(observer, text),
     )
 }
 
-fn create_red_listener(observer: &Observer, text: &RefCell<String>) -> Listener {
+fn create_red_listener(text: &RefCell<String>, observer: &Observer) -> Listener {
     observer.listen::<RedEvent>(|_, _| {
         text.borrow_mut().push_str("red event");
     })
@@ -50,7 +46,7 @@ fn create_red_listener(observer: &Observer, text: &RefCell<String>) -> Listener 
 fn create_first_listener(observer: &Observer) -> Listener {
     observer.listen::<FirstEvent>(|first_event, events| {
         events.send(SecondEvent {
-            message: format!("first({}), ", first_event.val),
+            message: format!("first({}),", first_event.val),
         });
     })
 }
@@ -58,18 +54,18 @@ fn create_first_listener(observer: &Observer) -> Listener {
 fn create_second_listener(observer: &Observer) -> Listener {
     observer.listen::<SecondEvent>(|second_event, events| {
         events.send(ThirdEvent {
-            string_val: format!("{} second, ", second_event.message),
+            string_val: format!("{} second,", second_event.message),
         });
     })
 }
 
-fn create_third_listener(observer: &Observer, text: &RefCell<String>) -> Listener {
+fn create_third_listener(observer: &Observer, out_text: &RefCell<String>) -> Listener {
     observer.listen::<ThirdEvent>(|third_event, _| {
-        text.borrow_mut()
-            .push_str(&format!("{} third, ", third_event.string_val));
+        out_text.borrow_mut()
+            .push_str(&format!("{} third", third_event.string_val));
     })
 }
-
+ 
 // This code implements a structure called Observer, designed as a centralized system for message
 // processing. Observer performs the following tasks:
 //
